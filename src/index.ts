@@ -30,29 +30,39 @@ const session = new LlamaChatSession({
     contextSequence: context.getSequence()
 });
 
-// Endpoint API pour poser une question au LLM
-app.post('/ask', async (req, res) => {
-    const { question } = req.body;
+// Endpoint modifié pour analyser une histoire et extraire les informations dans un seul paragraphe
+app.post('/analyze-story', async (req, res) => {
+    console.log(chalk.green("Received request to /analyze-story"));
+    const { story } = req.body;
 
-    if (!question) {
-        return res.status(400).json({ error: "A question is required." });
+    if (!story) {
+        console.log(chalk.red("No story provided in the request"));
+        return res.status(400).json({ error: "A story is required." });
     }
 
     try {
-        console.log(chalk.yellow("User: ") + question);
+        console.log(chalk.yellow("Analyzing story..."));
+
+        const prompt = `Analyze the following story and extract these specific information:
+Coordonnées de l'acquéreur (nom, prénom, société, email, téléphone), type d'acquéreur, cible recherchée (secteurs d'activité avec code NAF, nombre de collaborateurs, localisations géographiques, niveau moyen de CA), autres informations pertinentes (calendrier, fonds disponibles, éléments importants).
+Return ONLY the extracted information in a single paragraph, without any additional phrases or explanations. Here's the story:
+
+${story}
+
+Extracted information:`;
 
         let responseText = "";
-        const answer = await session.prompt(question, {
+        await session.prompt(prompt, {
             onTextChunk(chunk) {
                 responseText += chunk;
             }
         });
 
-        // Optionnel : renvoyer la réponse consolidée ou la réponse streamée
-        res.json({ answer: responseText });
+        console.log(chalk.green("Analysis complete. Information extracted:", responseText));
+        res.json({ text_story: responseText.trim() });
     } catch (error) {
-        console.error("Error during LLM processing:", error);
-        res.status(500).json({ error: "An error occurred while processing the question." });
+        console.error(chalk.red("Error during story analysis:", error));
+        res.status(500).json({ error: "An error occurred while analyzing the story." });
     }
 });
 
