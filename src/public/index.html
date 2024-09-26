@@ -41,8 +41,14 @@
                             </svg>
                         </span>
                     </button>
-                    <button type="button" id="saveButton" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300 hidden">
-                        Enregistrer
+                    <button type="button" id="saveButton" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300 hidden flex items-center justify-center">
+                        <span id="saveButtonText">Enregistrer</span>
+                        <span id="saveLoader" class="hidden ml-2">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                        </span>
                     </button>
                 </div>
             </form>
@@ -69,6 +75,8 @@
         // Sélectionner les éléments du bouton et du loader
         const verifyButtonText = document.getElementById('verifyButtonText');
         const verifyLoader = document.getElementById('verifyLoader');
+        const saveButtonText = document.getElementById('saveButtonText');
+        const saveLoader = document.getElementById('saveLoader');
 
         verifyButton.addEventListener('click', async function() {
             const story = storyTextarea.value;
@@ -117,6 +125,14 @@
 
         saveButton.addEventListener('click', async function() {
             const story = storyTextarea.value;
+        
+            // Afficher le loader, changer le texte et désactiver le bouton
+            saveButtonText.textContent = "Enregistrement...";
+            saveButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            saveButton.classList.add('bg-gray-500', 'cursor-not-allowed');
+            saveLoader.classList.remove('hidden');
+            saveButton.disabled = true;
+        
             try {
                 const response = await fetch('/submit-story', {
                     method: 'POST',
@@ -125,19 +141,28 @@
                     },
                     body: JSON.stringify({ story: story })
                 });
-
+        
                 const data = await response.json();
-
+        
                 if (response.ok) {
                     showModal('Succès', 'Votre histoire a été enregistrée avec succès.');
                     storyTextarea.value = '';
-                    saveButton.classList.add('hidden');
+                    saveButton.classList.add('hidden'); // Masquer le bouton après succès
                 } else {
-                    showModal('Erreur', data.error || 'Une erreur est survenue lors de lenregistrement.');
+                    showModal('Erreur', data.error || 'Une erreur est survenue lors de l\'enregistrement.');
                 }
             } catch (error) {
                 console.error('Erreur:', error);
                 showModal('Erreur', 'Une erreur est survenue lors de la communication avec le serveur.');
+            } finally {
+                // Réinitialiser le bouton après enregistrement, sauf en cas de succès où il est masqué
+                if (!response.ok) {
+                    saveButtonText.textContent = "Enregistrer";
+                    saveButton.classList.remove('bg-gray-500', 'cursor-not-allowed');
+                    saveButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    saveLoader.classList.add('hidden');
+                    saveButton.disabled = false;
+                }
             }
         });
 
