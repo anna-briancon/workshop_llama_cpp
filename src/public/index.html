@@ -32,8 +32,14 @@
                     <textarea id="story" name="companyStory" rows="6" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="Commencez à raconter l'histoire de votre entreprise ici..."></textarea>
                 </div>
                 <div class="flex justify-center space-x-4">
-                    <button type="button" id="verifyButton" class="px-6 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-colors duration-300">
-                        Vérifier par l'IA
+                    <button type="button" id="verifyButton" class="px-6 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-colors duration-300 flex items-center justify-center">
+                        <span id="verifyButtonText">Vérifier par l'IA</span>
+                        <span id="verifyLoader" class="hidden ml-2">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                        </span>
                     </button>
                     <button type="button" id="saveButton" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300 hidden">
                         Enregistrer
@@ -60,6 +66,9 @@
         const modalTitle = document.getElementById('modalTitle');
         const modalMessage = document.getElementById('modalMessage');
         const closeModal = document.getElementById('closeModal');
+        // Sélectionner les éléments du bouton et du loader
+        const verifyButtonText = document.getElementById('verifyButtonText');
+        const verifyLoader = document.getElementById('verifyLoader');
 
         verifyButton.addEventListener('click', async function() {
             const story = storyTextarea.value;
@@ -67,6 +76,12 @@
                 showModal('Erreur', 'Veuillez entrer une histoire avant de vérifier.');
                 return;
             }
+
+            verifyButtonText.textContent = "Je vérifie...";
+            verifyButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+            verifyButton.classList.add('bg-gray-500', 'cursor-not-allowed');
+            verifyLoader.classList.remove('hidden');
+            verifyButton.disabled = true;
 
             try {
                 const response = await fetch('/analyze-story', {
@@ -90,8 +105,15 @@
             } catch (error) {
                 console.error('Erreur:', error);
                 showModal('Erreur', 'Une erreur est survenue lors de la communication avec le serveur.');
+            } finally {
+                verifyButtonText.textContent = "Vérifier par l'IA";
+                verifyButton.classList.remove('bg-gray-500', 'cursor-not-allowed');
+                verifyButton.classList.add('bg-green-600', 'hover:bg-green-700');
+                verifyLoader.classList.add('hidden');
+                verifyButton.disabled = false;
             }
         });
+
 
         saveButton.addEventListener('click', async function() {
             const story = storyTextarea.value;
