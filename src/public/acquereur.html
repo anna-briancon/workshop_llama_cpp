@@ -8,7 +8,6 @@
 </head>
 
 <body class="bg-gray-100 min-h-screen flex flex-col">
-    <!-- Navigation -->
     <nav class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -26,25 +25,68 @@
     <div class="flex-grow flex flex-col items-center justify-center p-6">
         <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl mb-6">
             <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Que souhaitez-vous savoir sur les biens disponibles ?</h1>
-            <form action="/submit-question" method="POST">
+            <form id="questionForm">
                 <div class="mb-6">
                     <label for="question" class="block mb-2 text-sm font-medium text-gray-700">Votre question</label>
                     <textarea id="question" name="userQuestion" rows="3" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="Posez votre question ici..."></textarea>
                 </div>
                 <div class="flex justify-center">
-                    <button type="submit" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300">
-                        Avoir les info
+                    <button id="submitButton" type="submit" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300 flex items-center justify-center">
+                        <span id="buttonText">Obtenir les info</span>
+                        <span id="loader" class="hidden ml-2">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                        </span>
                     </button>
                 </div>
             </form>
         </div>
 
-        <!-- Onglet pour afficher la réponse -->
         <div class="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-2xl">
             <h2 class="text-lg font-bold mb-4 text-gray-800">Résultat :</h2>
             <p id="answer" class="text-gray-700">La réponse à votre question s'affichera ici après soumission.</p>
         </div>
     </div>
-</body>
 
+    <script>
+        document.getElementById('questionForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+    
+            const question = document.getElementById('question').value;
+            const submitButton = document.getElementById('submitButton');
+            const buttonText = document.getElementById('buttonText');
+            const loader = document.getElementById('loader');
+    
+            submitButton.disabled = true;
+            submitButton.classList.add('bg-gray-400', 'cursor-not-allowed');
+            submitButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            loader.classList.remove('hidden');
+            buttonText.textContent = "Recherche en cours...";
+    
+            try {
+                const response = await fetch('/submit-question', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question }),
+                });
+    
+                const data = await response.json();
+
+                document.getElementById('answer').textContent = data.answer;
+            } catch (error) {
+                document.getElementById('answer').textContent = "Erreur lors de la récupération de la réponse.";
+            } finally {
+                submitButton.disabled = false;
+                submitButton.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                submitButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                loader.classList.add('hidden');
+                buttonText.textContent = "Obtenir les info";
+            }
+        });
+    </script>    
+</body>
 </html>

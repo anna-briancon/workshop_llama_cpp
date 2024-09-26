@@ -6,8 +6,12 @@ import express from "express";
 import {getLlama, LlamaChatSession} from "node-llama-cpp";
 import db from './database.js';
 
+const bodyParser = require('body-parser');
+
 const app = express();
 app.use(express.json());
+// Middleware pour traiter les requêtes JSON
+app.use(bodyParser.json());
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const modelsFolderDirectory = path.join(__dirname, "..", "models");
@@ -82,6 +86,30 @@ app.post('/submit-info', (req, res) => {
 // Route formulaire acquereur
 app.get('/acquereur', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'acquereur.html'));
+});
+
+// Route pour traiter la question et envoyer une réponse de l'IA
+app.post('/submit-question', async (req, res) => {
+    const userQuestion = req.body.question;
+
+    try {
+        // Simuler une requête à votre modèle IA (vous devez remplacer cela par la vraie implémentation)
+        const aiResponse = await fetch('http://localhost:3068/ask', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ question: userQuestion }),
+        });
+
+        const data = await aiResponse.json();
+
+        // Retourner la réponse à la requête du front-end
+        res.json({ answer: data.answer });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ answer: 'Erreur lors de la communication avec l\'IA.' });
+    }
 });
 
 // Lancer le serveur
