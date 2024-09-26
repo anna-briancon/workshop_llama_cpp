@@ -4,6 +4,7 @@ import chalk from "chalk";
 // @ts-ignore
 import express from "express";
 import {getLlama, LlamaChatSession} from "node-llama-cpp";
+import db from './database.js';
 
 const app = express();
 app.use(express.json());
@@ -58,7 +59,24 @@ app.get('/', (req, res) => {
 
 // Récupèrer les info de cédant ici
 app.post('/submit-info', (req, res) => {
-    // ...
+    // On stock les infos dans la bd 
+    const { companyStory } = req.body;
+
+    if (!companyStory) {
+        return res.status(400).json({ error: "Le champ 'companyStory' est requis." });
+    }
+
+    const query = `INSERT INTO company (story) VALUES (?)`;
+
+    db.run(query, [companyStory], function (err) {
+        if (err) {
+            console.error("Erreur lors de l'insertion dans la base de données :", err);
+            return res.status(500).json({ error: "Erreur lors de l'enregistrement de l'histoire." });
+        }
+
+        console.log("Histoire de l'entreprise enregistrée avec succès, ID:", this.lastID);
+        res.status(200).json({ message: "Histoire de l'entreprise enregistrée avec succès." });
+    });
 });
 
 // Route formulaire acquereur
