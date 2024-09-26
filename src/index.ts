@@ -93,9 +93,40 @@ app.post('/submit-info', (req, res) => {
     });
 });
 
+// home route
+app.get('/home', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'home.html'));
+});
+
 // Route formulaire acquereur
 app.get('/acquereur', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'acquereur.html'));
+});
+
+// Endpoint API pour poser une question au LLM
+app.post('/ask', async (req, res) => {
+    const { question } = req.body;
+
+    if (!question) {
+        return res.status(400).json({ error: "A question is required." });
+    }
+
+    try {
+        console.log(chalk.yellow("User: ") + question);
+
+        let responseText = "";
+        const answer = await session.prompt(question, {
+            onTextChunk(chunk) {
+                responseText += chunk;
+            }
+        });
+
+        // Optionnel : renvoyer la réponse consolidée ou la réponse streamée
+        res.json({ answer: responseText });
+    } catch (error) {
+        console.error("Error during LLM processing:", error);
+        res.status(500).json({ error: "An error occurred while processing the question." });
+    }
 });
 
 // Route pour traiter la question et envoyer une réponse de l'IA
