@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Informations Extraites</title>
+</head>
+<body>
+    <h1>Informations Extraites de votre Histoire</h1>
+    <form action="/submit-info" method="POST">
+        <label>Secteur d’activité (code NAF) :</label>
+        <input type="text" name="nafCode" value="<%= nafCode %>">
+        <br>
+
+        <label>Nombre de collaborateurs :</label>
+        <input type="number" name="numEmployees" value="<%= numEmployees %>">
+        <br>
+
+        <label>Localisation géographique (départements) :</label>
+        <input type="text" name="location" value="<%= location %>">
+        <br>
+
+        <label>Niveau moyen de CA sur les 2 dernières années :</label>
+        <input type="text" name="averageRevenue" value="<%= averageRevenue %>">
+        <br>
+
+        <label>Autres informations pertinentes :</label>
+        <textarea name="otherInfo" rows="5" cols="50"><%= otherInfo %></textarea>
+        <br>
+
+        <button type="submit">Soumettre</button>
+    </form>
+</body>
+</html>

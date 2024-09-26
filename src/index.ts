@@ -51,6 +51,21 @@ app.post('/ask', async (req, res) => {
     }
 });
 
+// Route formulaire cédant
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Récupèrer les info de cédant ici
+app.post('/submit-info', (req, res) => {
+    // ...
+});
+
+// Route formulaire acquereur
+app.get('/acquereur', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'acquereur.html'));
+});
+
 // Lancer le serveur
 const PORT = 3068;
 app.listen(PORT, () => {
