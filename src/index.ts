@@ -15,6 +15,7 @@ app.use(bodyParser.json());
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const modelsFolderDirectory = path.join(__dirname, "..", "models");
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Charger le modèle et le contexte au démarrage du serveur
 const llama = await getLlama();
