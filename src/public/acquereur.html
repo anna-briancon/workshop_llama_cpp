@@ -5,18 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulaire IA</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, rgba(55, 57, 199, 0.175), rgba(173, 104, 236, 0.175));
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen flex flex-col"></body>
     <nav class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0">
-                    <a href="/" class="text-xl font-black text-blue-700">XLINKS</a>
+                    <a href="/home" class="text-xl font-black text-purple-700">XLINKS</a>
                 </div>
                 <div class="hidden md:flex space-x-8">
-                    <a href="/" class="text-gray-700 hover:text-blue-600">Je souhaite vendre</a>
-                    <a href="/acquereur" class="text-blue-700 hover:text-blue-600">Je cherche à acheter</a>
+                    <a href="/" class="text-purple-700 hover:text-purple-600">Je souhaite vendre</a>
+                    <a href="/acquereur" class="text-purple-700 font-bold hover:text-purple-600">Je cherche à acheter</a>
                 </div>
             </div>
         </div>
@@ -27,11 +32,11 @@
             <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Que souhaitez-vous savoir sur les biens disponibles ?</h1>
             <form id="questionForm">
                 <div class="mb-6">
-                    <textarea id="question" name="userQuestion" rows="3" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="Posez votre question ici..."></textarea>
+                    <textarea id="question" name="userQuestion" rows="3" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-purple-500" placeholder="Posez votre question ici..."></textarea>
                 </div>
                 <div class="flex justify-center">
-                    <button id="submitButton" type="submit" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300 flex items-center justify-center">
-                        <span id="buttonText">Obtenir les info</span>
+                    <button id="submitButton" type="submit" class="px-6 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400 transition-colors duration-300 flex items-center justify-center">
+                        <span id="buttonText">Obtenir les infos</span>
                         <span id="loader" class="hidden ml-2">
                             <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -64,7 +69,7 @@
 
             submitButton.disabled = true;
             submitButton.classList.add('bg-gray-400', 'cursor-not-allowed');
-            submitButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            submitButton.classList.remove('bg-slate-600', 'hover:bg-slate-700');
             loader.classList.remove('hidden');
             buttonText.textContent = "Recherche en cours...";
     
@@ -89,7 +94,7 @@
             } finally {
                 submitButton.disabled = false;
                 submitButton.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                submitButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                submitButton.classList.add('bg-slate-600', 'hover:bg-slate-700');
                 loader.classList.add('hidden');
                 buttonText.textContent = "Obtenir les info";
             }
