@@ -11,3 +11,8 @@ Start the project:
 ```bash
 npm start
 ```
+
+Check what's in your DB:
+```bash
+sqlite3 .\src\database\xlinks.db
+```
