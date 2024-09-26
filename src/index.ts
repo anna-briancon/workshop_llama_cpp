@@ -52,50 +52,49 @@ function extractValidJSON(text: string): any {
     return null;
 }
 
-// Endpoint modifié pour analyser une histoire et extraire les informations structurées
 app.post('/analyze-story', async (req, res) => {
-    console.log(chalk.green("Received request to /analyze-story"));
+    console.log("Received request to /analyze-story");
     const { story } = req.body;
 
     if (!story) {
-        console.log(chalk.red("No story provided in the request"));
+        console.log("No story provided in the request");
         return res.status(400).json({ error: "A story is required." });
     }
 
     try {
-        console.log(chalk.yellow("Analyzing story..."));
+        console.log("Analyzing story...");
 
         const prompt = `Analyze the following story and extract the information into a structured JSON format. Return ONLY the JSON, without any additional text before or after. Follow this exact structure:
 
-{
-  "nom": "",
-  "prenom": "",
-  "societe": "",
-  "email": "",
-  "telephone": "",
-  "type_acquereur": "",
-  "cible_recherchee": {
-    "secteur": "",
-    "code_NAF": ""
-  },
-  "nombre_collaborateurs": "",
-  "localisations_geographiques": [],
-  "niveau_CA": {
-    "minimum": 0,
-    "maximum": 0,
-    "unite": ""
-  },
-  "calendrier": "",
-  "fonds_disponibles": {
-    "montant": 0,
-    "unite": ""
-  },
-  "elements_importants": []
-}
+        {
+          "nom": "",
+          "prenom": "",
+          "societe": "",
+          "email": "",
+          "telephone": "",
+          "type_acquereur": "",
+          "cible_recherchee": {
+            "secteur": "",
+            "code_NAF": ""
+          },
+          "nombre_collaborateurs": "",
+          "localisations_geographiques": [],
+          "niveau_CA": {
+            "minimum": 0,
+            "maximum": 0,
+            "unite": ""
+          },
+          "calendrier": "",
+          "fonds_disponibles": {
+            "montant": 0,
+            "unite": ""
+          },
+          "elements_importants": []
+        }
 
-Fill in the JSON structure with the information from the story. If a field is not mentioned in the story, leave it as an empty string or array. For numerical values, use 0 if not specified. Here's the story:
+        Fill in the JSON structure with the information from the story. If a field is not mentioned in the story, leave it as an empty string or array. For numerical values, use 0 if not specified. Here's the story:
 
-${story}`;
+        ${story}`;
 
         let responseText = "";
         await session.prompt(prompt, {
@@ -111,7 +110,7 @@ ${story}`;
             return res.status(500).json({ error: "Failed to extract valid JSON from the response." });
         }
 
-        console.log(chalk.green("Analysis complete. Information extracted:", JSON.stringify(extractedInfo, null, 2)));
+        console.log("Analysis complete. Information extracted:", JSON.stringify(extractedInfo, null, 2));
 
         // Check for missing required fields
         const missingFields = checkRequiredFields(extractedInfo);
@@ -121,6 +120,71 @@ ${story}`;
                 error: "Missing required information",
                 missingFields: missingFields
             });
+        }
+
+        res.json(extractedInfo);
+    } catch (error) {
+        console.error("Error during story analysis:", error);
+        res.status(500).json({ error: "An error occurred while analyzing the story." });
+    }
+});
+
+// Nouvelle route pour soumettre l'histoire
+app.post('/submit-story', async (req, res) => {
+    const { story } = req.body;
+
+    if (!story) {
+        return res.status(400).json({ error: "A story is required." });
+    }
+
+    console.log("Submitting story...");
+
+
+    try {
+        // Analyser l'histoire pour extraire les informations structurées
+        const prompt = `Analyze the following story and extract the information into a structured JSON format. Return ONLY the JSON, without any additional text before or after. Follow this exact structure:
+
+        {
+          "nom": "",
+          "prenom": "",
+          "societe": "",
+          "email": "",
+          "telephone": "",
+          "type_acquereur": "",
+          "cible_recherchee": {
+            "secteur": "",
+            "code_NAF": ""
+          },
+          "nombre_collaborateurs": "",
+          "localisations_geographiques": [],
+          "niveau_CA": {
+            "minimum": 0,
+            "maximum": 0,
+            "unite": ""
+          },
+          "calendrier": "",
+          "fonds_disponibles": {
+            "montant": 0,
+            "unite": ""
+          },
+          "elements_importants": []
+        }
+
+        Fill in the JSON structure with the information from the story. If a field is not mentioned in the story, leave it as an empty string or array. For numerical values, use 0 if not specified. Here's the story:
+
+        ${story}`;
+
+        let responseText = "";
+        await session.prompt(prompt, {
+            onTextChunk(chunk) {
+                responseText += chunk;
+            }
+        });
+
+        const extractedInfo = extractValidJSON(responseText);
+
+        if (!extractedInfo) {
+            return res.status(500).json({ error: "Failed to extract valid JSON from the response." });
         }
 
         // Insérer les données extraites dans la base de données
@@ -153,15 +217,15 @@ ${story}`;
 
         db.run(query, values, function(err) {
             if (err) {
-                console.error(chalk.red("Error inserting data into database:", err));
+                console.error("Error inserting data into database:", err);
                 return res.status(500).json({ error: "An error occurred while saving the analyzed data." });
             }
-            console.log(chalk.green("Data inserted successfully. ID:", this.lastID));
-            res.json({ ...extractedInfo, id: this.lastID });
+            console.log("Data inserted successfully. ID:", this.lastID);
+            res.json({ message: "Story saved successfully", id: this.lastID });
         });
     } catch (error) {
-        console.error(chalk.red("Error during story analysis:", error));
-        res.status(500).json({ error: "An error occurred while analyzing the story." });
+        console.error("Error during story submission:", error);
+        res.status(500).json({ error: "An error occurred while submitting the story." });
     }
 });
 

@@ -31,60 +31,102 @@
                     <label for="story" class="block mb-2 text-sm font-medium text-gray-700">Votre histoire</label>
                     <textarea id="story" name="companyStory" rows="6" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="Commencez à raconter l'histoire de votre entreprise ici..."></textarea>
                 </div>
-                <div class="flex justify-center">
-                    <button type="submit" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300">
-                        Envoyer
+                <div class="flex justify-center space-x-4">
+                    <button type="button" id="verifyButton" class="px-6 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-colors duration-300">
+                        Vérifier par l'IA
+                    </button>
+                    <button type="button" id="saveButton" class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300 hidden">
+                        Enregistrer
                     </button>
                 </div>
             </form>
         </div>
     </div>
     
-    <!-- Modal -->
-    <div id="submissionModal" class="fixed inset-0 flex items-center text-center justify-center bg-gray-900 bg-opacity-50 hidden">
+    <!-- Modal pour les messages -->
+    <div id="messageModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden">
         <div class="bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">Informations soumises</h2>
-            <p class="text-gray-700">Votre histoire a été soumise avec succès.</p>
+            <h2 id="modalTitle" class="text-lg font-bold text-gray-800 mb-4"></h2>
+            <p id="modalMessage" class="text-gray-700"></p>
             <button id="closeModal" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">OK</button>
         </div>
     </div>
     
     <script>
-        document.getElementById('storyForm').addEventListener('submit', function(e) {
-            e.preventDefault();  // Empêcher le rechargement de la page lors de la soumission du formulaire
-    
-            const story = document.getElementById('story').value;  // Récupérer la valeur du textarea
-    
-            // Effectuer une requête POST en JSON vers le serveur
-            fetch('/submit-info', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',  // Spécifier que les données sont envoyées en JSON
-                },
-                body: JSON.stringify({ companyStory: story })  // Envoyer l'histoire de l'entreprise sous forme de JSON
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert("Erreur : " + data.error);  // Afficher une alerte en cas d'erreur
+        const verifyButton = document.getElementById('verifyButton');
+        const saveButton = document.getElementById('saveButton');
+        const storyTextarea = document.getElementById('story');
+        const messageModal = document.getElementById('messageModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeModal = document.getElementById('closeModal');
+
+        verifyButton.addEventListener('click', async function() {
+            const story = storyTextarea.value;
+            if (!story) {
+                showModal('Erreur', 'Veuillez entrer une histoire avant de vérifier.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/analyze-story', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ story: story })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showModal('Vérification réussie', 'Toutes les informations nécessaires sont présentes. Vous pouvez maintenant enregistrer.');
+                    saveButton.classList.remove('hidden');
+                } else if (data.error === "Missing required information") {
+                    showModal('Informations manquantes', `Veuillez compléter les champs suivants : ${data.missingFields.join(', ')}`);
                 } else {
-                    // Afficher le modal en retirant la classe 'hidden'
-                    document.getElementById('submissionModal').classList.remove('hidden');
+                    showModal('Erreur', data.error || 'Une erreur est survenue lors de la vérification.');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la soumission.');
-            });
+                showModal('Erreur', 'Une erreur est survenue lors de la communication avec le serveur.');
+            }
         });
-    
-        // Fermer le modal et vider le formulaire lorsque l'utilisateur clique sur le bouton "OK"
-        document.getElementById('closeModal').addEventListener('click', function() {
-            // Masquer le modal
-            document.getElementById('submissionModal').classList.add('hidden');
-    
-            // Réinitialiser le formulaire
-            document.getElementById('storyForm').reset();
+
+        saveButton.addEventListener('click', async function() {
+            const story = storyTextarea.value;
+            try {
+                const response = await fetch('/submit-story', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ story: story })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showModal('Succès', 'Votre histoire a été enregistrée avec succès.');
+                    storyTextarea.value = '';
+                    saveButton.classList.add('hidden');
+                } else {
+                    showModal('Erreur', data.error || 'Une erreur est survenue lors de lenregistrement.');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showModal('Erreur', 'Une erreur est survenue lors de la communication avec le serveur.');
+            }
+        });
+
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            messageModal.classList.remove('hidden');
+        }
+
+        closeModal.addEventListener('click', function() {
+            messageModal.classList.add('hidden');
         });
     </script>
 </body>
