@@ -5,6 +5,8 @@ import chalk from "chalk";
 import express from "express";
 import {getLlama, LlamaChatSession} from "node-llama-cpp";
 import db from './database.js';
+import sqlite3 from 'sqlite3';
+sqlite3.verbose();
 
 const bodyParser = require('body-parser');
 
@@ -90,10 +92,10 @@ app.get('/acquereur', (req, res) => {
 
 // Route pour traiter la question et envoyer une réponse de l'IA
 app.post('/submit-question', async (req, res) => {
-    const userQuestion = req.body.question;
+    const userQuestion = "Dans le texte entre parenthèses, récupère les infos importantes sur ce que recherche la personne. Écris-moi les infos qu'il cherche sous forme de json, en mettant ces infos-là : code naf, taille effectif, localisation entreprise, niveau de CA, et autres. (" + req.body.question + ")";
 
     try {
-        // Simuler une requête à votre modèle IA (vous devez remplacer cela par la vraie implémentation)
+        // Envoyer la question à l'IA pour analyse
         const aiResponse = await fetch('http://localhost:3068/ask', {
             method: 'POST',
             headers: {
@@ -102,13 +104,30 @@ app.post('/submit-question', async (req, res) => {
             body: JSON.stringify({ question: userQuestion }),
         });
 
-        const data = await aiResponse.json();
+        const aiData = await aiResponse.json();
+        console.log("IA response:", aiData);
+        // Extraire les informations du JSON retourné par l'IA
+        const { tailleEffectif, localisationEntreprise, niveauCA, autres } = JSON.parse(aiData.answer.split('```json\n')[1].split('```')[0]);
 
-        // Retourner la réponse à la requête du front-end
-        res.json({ answer: data.answer });
+        const sqlQuery = `
+            SELECT * FROM company
+        `;
+
+        db.all(sqlQuery, [tailleEffectif, tailleEffectif, localisationEntreprise, localisationEntreprise, niveauCA, niveauCA], (err, rows) => {
+            console.log("Entreprises trouvées:", rows); 
+            if (err) {
+                console.error(err);
+                res.status(500).json({ error: "Erreur lors de la recherche dans la base de données." });
+            } else {
+                res.json({ entreprises: rows });
+            }
+        });
+
+        db.close();
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ answer: 'Erreur lors de la communication avec l\'IA.' });
+        res.status(500).json({ answer: "Erreur lors de la communication avec l'IA ou la base de données." });
     }
 });
 
