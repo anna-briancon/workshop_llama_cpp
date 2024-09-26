@@ -1,3 +1,4 @@
 /node_modules/
 /models/
 .DS_Store
+/src/database/**
