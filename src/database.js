@@ -18,17 +18,34 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 // Créer une table pour stocker les informations de l'entreprise
+// Dans database.js
 db.serialize(() => {
     db.run(`
-        CREATE TABLE IF NOT EXISTS company (
+        CREATE TABLE IF NOT EXISTS analyzed_stories (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            story TEXT NOT NULL
+            nom TEXT,
+            prenom TEXT,
+            societe TEXT,
+            email TEXT,
+            telephone TEXT,
+            type_acquereur TEXT,
+            secteur TEXT,
+            code_NAF TEXT,
+            nombre_collaborateurs TEXT,
+            localisations_geographiques TEXT,
+            niveau_CA_minimum INTEGER,
+            niveau_CA_maximum INTEGER,
+            niveau_CA_unite TEXT,
+            calendrier TEXT,
+            fonds_disponibles_montant INTEGER,
+            fonds_disponibles_unite TEXT,
+            elements_importants TEXT
         )
     `, (err) => {
         if (err) {
             console.error("Erreur lors de la création de la table :", err);
         } else {
-            console.log("Table 'company' créée ou déjà existante.");
+            console.log("Table 'analyzed_stories' créée ou déjà existante.");
         }
     });
 });
