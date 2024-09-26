@@ -45,6 +45,7 @@
 
         <div id="resultSection" class="bg-gray-200 p-6 rounded-lg shadow-md w-full max-w-2xl hidden">
             <h2 class="text-lg font-bold mb-4 text-gray-800">Résultat :</h2>
+            <p id="count" class="text-gray-700"></p>
             <p id="answer" class="text-gray-700">La réponse à votre question s'affichera ici après soumission.</p>
         </div>
     </div>
@@ -59,6 +60,7 @@
             const loader = document.getElementById('loader');
             const resultSection = document.getElementById('resultSection');
             const answerElement = document.getElementById('answer');
+            const countElement = document.getElementById('count');
 
             submitButton.disabled = true;
             submitButton.classList.add('bg-gray-400', 'cursor-not-allowed');
@@ -77,7 +79,9 @@
     
                 const data = await response.json();
 
-                answerElement.textContent = data.answer;
+                // Affichage du nombre d'entreprises trouvées
+                countElement.textContent = `Nombre d'entreprises trouvées : ${data.count}`;
+                answerElement.textContent = data.answer; // Assuming you want to show an answer here too
                 resultSection.classList.remove('hidden');
             } catch (error) {
                 answerElement.textContent = "Erreur lors de la récupération de la réponse.";

@@ -231,7 +231,7 @@ app.post('/ask', async (req, res) => {
 
 // Route pour traiter la question et envoyer une réponse de l'IA
 app.post('/submit-question', async (req, res) => {
-    const userQuestion = "Dans le texte entre parenthèses, récupère les infos importantes sur ce que recherche la personne. Écris-moi les infos qu'il cherche sous forme de json, en mettant ces infos-là : code naf, taille effectif, localisation entreprise, niveau de CA, et autres. (" + req.body.question + ")";
+    const userQuestion = "Dans le texte entre parenthèses, récupère les infos importantes sur ce que recherche la personne. Écris-moi les infos qu'il cherche sous forme de json, en mettant ces infos-là : nom, prenom, societe, email, telephone, type_acquereur, secteur, code_NAF, nombre_collaborateurs, localisations_geographiques, niveau_CA_minimum, niveau_CA_maximum, niveau_CA_unite, calendrier, fonds_disponibles_montant, fonds_disponibles_unite : Si on a des chiffres on stock que le chiffre et pas les mots sauf pour le code NAF, le - et pour le calendrier : (" + req.body.question + ")";
 
     try {
         // Envoyer la question à l'IA pour analyse
@@ -245,28 +245,86 @@ app.post('/submit-question', async (req, res) => {
 
         const aiData = await aiResponse.json();
         console.log("IA response:", aiData);
+
         // Extraire les informations du JSON retourné par l'IA
-        const { tailleEffectif, localisationEntreprise, niveauCA, autres } = JSON.parse(aiData.answer.split('```json\n')[1].split('```')[0]);
+        const {
+            nom, prenom, societe, email, telephone, type_acquereur,
+            secteur, code_NAF, nombre_collaborateurs, localisations_geographiques,
+            niveau_CA_minimum, niveau_CA_maximum, niveau_CA_unite,
+            calendrier, fonds_disponibles_montant, fonds_disponibles_unite, elements_importants
+        } = JSON.parse(aiData.answer.split('```json\n')[1].split('```')[0]);
 
-        const sqlQuery = `
-            SELECT * FROM company
-        `;
+        // Construire la requête SQL dynamiquement en fonction des valeurs présentes
+        let sqlQuery = `SELECT * FROM analyzed_stories WHERE 1=1`;
+        const sqlParams = [];
 
-        db.all(sqlQuery, [tailleEffectif, tailleEffectif, localisationEntreprise, localisationEntreprise, niveauCA, niveauCA], (err, rows) => {
-            console.log("Entreprises trouvées:", rows); 
+        if (nom) {
+            sqlQuery += ` AND nom = ?`;
+            sqlParams.push(nom);
+        }
+        if (prenom) {
+            sqlQuery += ` AND prenom = ?`;
+            sqlParams.push(prenom);
+        }
+        if (societe) {
+            sqlQuery += ` AND societe = ?`;
+            sqlParams.push(societe);
+        }
+        if (type_acquereur) {
+            sqlQuery += ` AND type_acquereur = ?`;
+            sqlParams.push(type_acquereur);
+        }
+        if (secteur) {
+            sqlQuery += ` AND secteur = ?`;
+            sqlParams.push(secteur);
+        }
+        if (code_NAF) {
+            sqlQuery += ` AND code_NAF = ?`;
+            sqlParams.push(code_NAF);
+        }
+        if (nombre_collaborateurs) {
+            sqlQuery += ` AND nombre_collaborateurs = ?`;
+            sqlParams.push(nombre_collaborateurs);
+        }
+        if (localisations_geographiques) {
+            sqlQuery += ` AND localisations_geographiques LIKE ?`;
+            sqlParams.push(`%${localisations_geographiques}%`);
+        }
+
+        if(niveau_CA_minimum) {
+            sqlQuery += ` AND niveau_CA_minimum >= ?`;
+            sqlParams.push(niveau_CA_minimum);
+        }
+        if (niveau_CA_maximum) {
+            sqlQuery += ` AND niveau_CA_maximum <= ?`;
+            sqlParams.push(niveau_CA_maximum);
+        }
+        if (fonds_disponibles_montant) {
+            sqlQuery += ` AND fonds_disponibles_montant >= ?`;
+            sqlParams.push(fonds_disponibles_montant);
+        }
+        if (elements_importants) {
+            sqlQuery += ` AND elements_importants LIKE ?`;
+            sqlParams.push(`%${elements_importants}%`); 
+        }
+
+        console.log("SQL Query:", sqlQuery);
+        console.log("SQL Params:", sqlParams);
+
+        // Exécuter la requête SQL
+        db.all(sqlQuery, sqlParams, (err, rows) => {
             if (err) {
-                console.error(err);
+                console.error("Erreur lors de la recherche dans la base de données:", err);
                 res.status(500).json({ error: "Erreur lors de la recherche dans la base de données." });
             } else {
-                res.json({ entreprises: rows });
+                console.log("Entreprises trouvées:", rows);
+                res.json({ count: rows.length, entreprises: rows });
             }
         });
 
-        db.close();
-
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ answer: "Erreur lors de la communication avec l'IA ou la base de données." });
+        console.error("Erreur lors de la communication avec l'IA ou la base de données:", error);
+        res.status(500).json({ error: "Erreur lors de la communication avec l'IA ou la base de données." });
     }
 });
 
