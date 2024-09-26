@@ -51,31 +51,41 @@
     
     <script>
         document.getElementById('storyForm').addEventListener('submit', function(e) {
-        e.preventDefault();  // Empêcher le rechargement de la page lors de la soumission du formulaire
-
-        const story = document.getElementById('story').value;  // Récupérer la valeur du textarea
-
-        // Effectuer une requête POST en JSON vers le serveur
-        fetch('/submit-info', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',  // Spécifier que les données sont envoyées en JSON
-            },
-            body: JSON.stringify({ companyStory: story })  // Envoyer l'histoire de l'entreprise sous forme de JSON
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert("Erreur : " + data.error);
-            } else {
-                alert("Votre histoire a été soumise avec succès !");
-            }
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Une erreur est survenue lors de la soumission.');
+            e.preventDefault();  // Empêcher le rechargement de la page lors de la soumission du formulaire
+    
+            const story = document.getElementById('story').value;  // Récupérer la valeur du textarea
+    
+            // Effectuer une requête POST en JSON vers le serveur
+            fetch('/submit-info', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',  // Spécifier que les données sont envoyées en JSON
+                },
+                body: JSON.stringify({ companyStory: story })  // Envoyer l'histoire de l'entreprise sous forme de JSON
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("Erreur : " + data.error);  // Afficher une alerte en cas d'erreur
+                } else {
+                    // Afficher le modal en retirant la classe 'hidden'
+                    document.getElementById('submissionModal').classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la soumission.');
+            });
         });
-    });
+    
+        // Fermer le modal et vider le formulaire lorsque l'utilisateur clique sur le bouton "OK"
+        document.getElementById('closeModal').addEventListener('click', function() {
+            // Masquer le modal
+            document.getElementById('submissionModal').classList.add('hidden');
+    
+            // Réinitialiser le formulaire
+            document.getElementById('storyForm').reset();
+        });
     </script>
 </body>
 </html>
