@@ -268,6 +268,11 @@ app.get('/acquereur', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'acquereur.html'));
 });
 
+// Route newsletter
+app.get('/newsletter', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'newsletter.html'));
+});
+
 // Endpoint API pour poser une question au LLM
 app.post('/ask', async (req, res) => {
     const { question } = req.body;

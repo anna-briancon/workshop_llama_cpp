@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S'inscrire à la Newsletter - XLINKS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="/" class="text-xl font-black text-purple-700">XLINKS</a>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="/cedant" class="text-gray-700 hover:text-purple-600">Je souhaite vendre</a>
+                    <a href="/acquereur" class="text-gray-700 hover:text-purple-600">Je cherche à acheter</a>
+                    <a href="/newsletter" class="px-4 py-2 border border-purple-600 text-purple-600 text-sm font-medium rounded-lg hover:text-purple-700 hover:border-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition-all duration-300">
+                        S'inscrire à la newsletter
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Newsletter Form -->
+    <div class="flex-grow flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+            <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">S'inscrire à la Newsletter</h1>
+            
+            <form id="newsletterForm">
+                <!-- Email Field -->
+                <div class="mb-4">
+                    <label for="email" class="block mb-2 text-sm font-medium text-gray-700">Adresse e-mail</label>
+                    <input type="email" id="email" name="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500" placeholder="Entrez votre e-mail">
+                </div>
+                
+                <!-- Privacy Policy Checkbox -->
+                <div class="mb-6">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" class="form-checkbox text-purple-600 border-gray-300 rounded focus:ring-purple-500" id="privacyPolicy">
+                        <span class="ml-2 text-sm text-gray-700">Je suis d'accord avec la <a href="#" class="text-purple-600 hover:underline">Politique de Confidentialité</a></span>
+                    </label>
+                </div>
+
+                <!-- Subscribe Button -->
+                <div class="flex justify-center">
+                    <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        S'inscrire
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
