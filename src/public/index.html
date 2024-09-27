@@ -92,13 +92,14 @@
                 showModal('Erreur', 'Veuillez entrer une histoire avant de vérifier.');
                 return;
             }
-
+        
+            // Disable the button and show loader
             verifyButtonText.textContent = "Je vérifie...";
-            verifyButton.classList.remove('bg-slate-600', 'hover:bg-slate-700');
+            verifyButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
             verifyButton.classList.add('bg-gray-500', 'cursor-not-allowed');
             verifyLoader.classList.remove('hidden');
             verifyButton.disabled = true;
-
+        
             try {
                 const response = await fetch('/analyze-story', {
                     method: 'POST',
@@ -107,9 +108,9 @@
                     },
                     body: JSON.stringify({ story: story })
                 });
-
+        
                 const data = await response.json();
-
+        
                 if (response.ok) {
                     showModal('Vérification réussie', 'Toutes les informations nécessaires sont présentes. Vous pouvez maintenant enregistrer.');
                     saveButton.classList.remove('hidden');
@@ -122,9 +123,10 @@
                 console.error('Erreur:', error);
                 showModal('Erreur', 'Une erreur est survenue lors de la communication avec le serveur.');
             } finally {
+                // Re-enable the verify button and reset its text and style
                 verifyButtonText.textContent = "Vérifier par l'IA";
                 verifyButton.classList.remove('bg-gray-500', 'cursor-not-allowed');
-                verifyButton.classList.add('bg-slate-600', 'hover:bg-slate-700');
+                verifyButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
                 verifyLoader.classList.add('hidden');
                 verifyButton.disabled = false;
             }
