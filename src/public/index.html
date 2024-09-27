@@ -135,12 +135,13 @@
 
         saveButton.addEventListener('click', async function() {
             const story = storyTextarea.value;
+            
             // Disable the verify button while saving
             verifyButton.disabled = true;
             verifyButton.classList.add('bg-gray-500', 'cursor-not-allowed');
-            verifyButton.classList.remove('hover:bg-purple-700');
-        
-            // Afficher le loader, changer le texte et désactiver le bouton
+            verifyButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+            
+            // Show loader and disable the save button
             saveButtonText.textContent = "Enregistrement...";
             saveButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
             saveButton.classList.add('bg-gray-500', 'cursor-not-allowed');
@@ -161,7 +162,7 @@
                 if (response.ok) {
                     showModal('Succès', 'Votre histoire a été enregistrée avec succès.');
                     storyTextarea.value = '';
-                    saveButton.classList.add('hidden'); // Masquer le bouton après succès
+                    saveButton.classList.add('hidden'); // Hide the save button after success
                 } else {
                     showModal('Erreur', data.error || 'Une erreur est survenue lors de l\'enregistrement.');
                 }
@@ -169,7 +170,12 @@
                 console.error('Erreur:', error);
                 showModal('Erreur', 'Une erreur est survenue lors de la communication avec le serveur.');
             } finally {
-                // Réinitialiser le bouton après enregistrement, sauf en cas de succès où il est masqué
+                // Re-enable the verify button and restore its classes after saving
+                verifyButton.disabled = false;
+                verifyButton.classList.remove('bg-gray-500', 'cursor-not-allowed');
+                verifyButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
+        
+                // Reset save button to its initial state if there was no success
                 if (!response.ok) {
                     saveButtonText.textContent = "Enregistrer";
                     saveButton.classList.remove('bg-gray-500', 'cursor-not-allowed');
@@ -177,11 +183,6 @@
                     saveLoader.classList.add('hidden');
                     saveButton.disabled = false;
                 }
-                
-                // Re-enable the verify button after saving is done
-                verifyButton.disabled = false;
-                verifyButton.classList.remove('bg-gray-500', 'cursor-not-allowed');
-                verifyButton.classList.add('hover:bg-purple-700');
             }
         });
 
