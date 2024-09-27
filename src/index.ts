@@ -232,7 +232,7 @@ app.post('/submit-story', async (req, res) => {
 });
 
 // Route formulaire cédant
-app.get('/', (req, res) => {
+app.get('/cedant', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -259,7 +259,7 @@ app.post('/submit-info', (req, res) => {
 });
 
 // home route
-app.get('/home', (req, res) => {
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
